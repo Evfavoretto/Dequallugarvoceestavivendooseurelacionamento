@@ -32,13 +32,71 @@ h2{font-size:clamp(2rem,4.5vw,3.35rem);max-width:850px;margin:12px auto 18px}.le
 .map{max-width:720px;margin:28px auto 0}.final{text-align:center;padding:55px 0 80px}.final p{max-width:700px;margin:0 auto 24px}.final .btn{margin-top:8px}
 footer{text-align:center;border-top:1px solid var(--line);padding:28px;color:#78817e;font-size:.82rem}
 @media(max-width:760px){.hero{padding-top:28px}section{padding:48px 0}.grid3,.prints{grid-template-columns:1fr}.btn{width:100%}.offer{border-radius:21px}.card{border-radius:20px}}
+
+/* Barra visual de progresso acelerada: comunica avanço sem representar o tempo real do vídeo. */
+.progress-shell{
+  margin:12px 10px 0;
+  height:8px;
+  border-radius:999px;
+  background:rgba(23,63,53,.10);
+  overflow:hidden;
+}
+.progress-bar{
+  width:4%;
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(90deg,#b6935a,#d4ae6e);
+  transition:width 1s linear;
+}
+#diagnostico-cta{
+  padding:18px 0 58px;
+  margin-top:-18px;
+}
+.diagnostic-reveal{
+  max-width:820px;
+  margin:18px auto 0;
+  text-align:left;
+  background:#fffdf9;
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:clamp(22px,4vw,34px);
+  box-shadow:0 12px 35px rgba(32,59,49,.08);
+}
+.diagnostic-reveal h2{
+  font-size:clamp(1.65rem,3.4vw,2.5rem);
+  margin:0 0 16px;
+  text-align:center;
+}
+.diagnostic-reveal ul{
+  margin:0;
+  padding-left:22px;
+}
+.diagnostic-reveal li{
+  margin:8px 0;
+}
+.diagnostic-reveal .closing{
+  margin:20px 0 0;
+  padding-top:18px;
+  border-top:1px solid var(--line);
+  color:var(--green);
+  font-weight:600;
+}
+@media(max-width:760px){
+  #diagnostico-cta{padding-top:10px;margin-top:-28px}
+  .progress-shell{margin-left:4px;margin-right:4px}
+}
+
 </style>
 </head>
 <body>
 <header class="hero"><div class="wrap">
 <div class="brand">Método O Seu Lugar®</div><h1>De qual Lugar Emocional você está se relacionando?</h1>
 <p class="note">Assista à aula até o final. Existe uma pergunta que pode mudar a forma como você enxerga o que está acontecendo no seu relacionamento.</p>
-<div class="video-shell"><div class="video"><iframe src="https://www.youtube.com/embed/quXJyX52I90?rel=0&controls=0&modestbranding=1&fs=0&iv_load_policy=3&disablekb=1&playsinline=1" title="De qual Lugar Emocional você está se relacionando?" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture;web-share" allowfullscreen></iframe></div></div>
+<div class="video-shell"><div class="video"><iframe src="https://www.youtube.com/embed/quXJyX52I90?rel=0&controls=0&modestbranding=1&fs=0&iv_load_policy=3&disablekb=1&playsinline=1" title="De qual Lugar Emocional você está se relacionando?" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture;web-share" allowfullscreen></iframe></div>
+<div class="progress-shell" aria-hidden="true">
+  <div class="progress-bar" id="visual-progress"></div>
+</div>
+</div>
 </div></header>
 
 <main>
@@ -47,21 +105,57 @@ footer{text-align:center;border-top:1px solid var(--line);padding:28px;color:#78
     <a class="btn" href="https://pay.kiwify.com.br/OfAFlVE" target="_blank" rel="noopener">
       Fazer meu diagnóstico
     </a>
+
+    <div class="diagnostic-reveal">
+      <h2>O que você recebe no diagnóstico</h2>
+      <ul>
+        <li>Seus 3 Lugares Emocionais mais presentes hoje;</li>
+        <li>Como cada Lugar aparece nas suas próprias respostas;</li>
+        <li>Como esses três movimentos se relacionam;</li>
+        <li>O que essa combinação revela sobre o seu relacionamento;</li>
+        <li>O ponto central que precisa começar a ser reorganizado.</li>
+      </ul>
+      <p class="closing">Uma leitura personalizada para você entender de qual Lugar está tentando amar, se proteger e fazer essa relação dar certo.</p>
+    </div>
   </div>
 </section>
 </main>
 <footer>Método O Seu Lugar® • Relacionamentos</footer>
 
 <script>
-  // O botão do diagnóstico aparece após 15 minutos e 35 segundos.
-  const CTA_DELAY_MS = (15 * 60 + 35) * 1000;
+  const CTA_DELAY_SECONDS = 15 * 60 + 35;
+  const CTA_DELAY_MS = CTA_DELAY_SECONDS * 1000;
+  const progress = document.getElementById('visual-progress');
+  const pageStartedAt = Date.now();
+
+  function updateVisualProgress(){
+    const elapsed = (Date.now() - pageStartedAt) / 1000;
+    const halfway = CTA_DELAY_SECONDS / 2;
+    let pct;
+
+    if (elapsed <= halfway) {
+      pct = 4 + (elapsed / halfway) * 84;   // 4% -> 88% na metade
+    } else if (elapsed < CTA_DELAY_SECONDS) {
+      pct = 88 + ((elapsed - halfway) / halfway) * 10; // 88% -> 98%
+    } else {
+      pct = 98;
+    }
+
+    if (progress) progress.style.width = Math.min(pct, 98) + '%';
+  }
+
+  updateVisualProgress();
+  const progressTimer = setInterval(updateVisualProgress, 1000);
 
   setTimeout(() => {
     const cta = document.getElementById('diagnostico-cta');
     if (cta) {
       cta.style.display = 'block';
+      requestAnimationFrame(() => {
+        cta.scrollIntoView({behavior:'smooth', block:'start'});
+      });
     }
+    updateVisualProgress();
   }, CTA_DELAY_MS);
 </script>
-
 </body></html>
